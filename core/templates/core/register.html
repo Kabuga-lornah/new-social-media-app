@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5 col-lg-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                   
+                    <h2 class="h4 mb-3">Create your account</h2>
+                </div>
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <input type="text" class="form-control form-control-lg" id="username" name="username" placeholder="Username" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control form-control-lg" id="email" name="email" placeholder="Email" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="password" class="form-control form-control-lg" id="password1" name="password1" placeholder="Password" required>
+                    </div>
+                    <div class="mb-4">
+                        <input type="password" class="form-control form-control-lg" id="password2" name="password2" placeholder="Confirm Password" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="profile_pic" class="form-label text-muted">Profile Picture (optional)</label>
+                        <input type="file" class="form-control" id="profile_pic" name="profile_pic">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 btn-lg">Sign up</button>
+                </form>
+                <div class="mt-4 text-center">
+                    <p class="text-muted">Already have an account? <a href="{% url 'login' %}" class="text-decoration-none text-primary">Sign in</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

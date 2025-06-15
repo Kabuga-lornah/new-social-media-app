@@ -1,0 +1,203 @@
+{% extends 'core/base.html' %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-6 mx-auto">
+        <!-- Profile Header -->
+        <div class="position-relative mb-4">
+            <div class="profile-banner" style="height: 200px; background-color: #333;"></div>
+            <div class="position-absolute" style="bottom: -60px; left: 20px;">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" class="profile-pic-lg border-dark" alt="Profile">
+                {% else %}
+                    <div class="profile-pic-lg default-profile border-dark d-flex align-items-center justify-content-center">
+                        {{ profile.user.username|first|upper }}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="d-flex justify-content-end mb-5">
+            {% if user.is_authenticated and user != profile.user %}
+                <button class="btn btn-primary follow-btn px-4" data-user-id="{{ profile.user.id }}">
+                    {% if user in profile.followers.all %}Following{% else %}Follow{% endif %}
+                </button>
+            {% endif %}
+        </div>
+        
+        <div class="mb-4">
+            <h3 class="mb-1">{{ profile.user.username }}</h3>
+            <p class="text-muted mb-2">@{{ profile.user.username }}</p>
+            <p class="mb-3">{{ profile.bio }}</p>
+            
+            <div class="d-flex text-muted mb-3">
+                <div class="me-4">
+                    <i class="fas fa-map-marker-alt me-1"></i>
+                    <span>Location</span>
+                </div>
+                <div class="me-4">
+                    <i class="fas fa-link me-1"></i>
+                    <a href="#" class="text-primary text-decoration-none">Website</a>
+                </div>
+                <div>
+                    <i class="far fa-calendar-alt me-1"></i>
+                    <span>Joined {{ profile.user.date_joined|date:"F Y" }}</span>
+                </div>
+            </div>
+            
+            <div class="d-flex">
+                <div class="me-4">
+                    <strong>{{ profile.user.post_set.count }}</strong> <span class="text-muted">Tweets</span>
+                </div>
+                <div class="me-4">
+                    <strong>{{ profile.followers.count }}</strong> <span class="text-muted">Followers</span>
+                </div>
+                <div>
+                    <strong>{{ profile.user.following.count }}</strong> <span class="text-muted">Following</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <ul class="nav nav-tabs border-0 mb-4">
+            <li class="nav-item">
+                <a class="nav-link active" href="#">Tweets</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="#">Replies</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="#">Media</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-muted" href="#">Likes</a>
+            </li>
+        </ul>
+        
+        <!-- User Posts -->
+        <div id="user-posts-container">
+            <!-- Tweets will be loaded here -->
+        </div>
+    </div>
+</div>
+
+{% block scripts %}
+<script>
+$(document).ready(function() {
+    loadUserPosts('{{ profile.user.id }}');
+    
+    $('.follow-btn').click(function() {
+        const userId = $(this).data('user-id');
+        const isFollowing = $(this).text().trim() === 'Following';
+        
+        const method = isFollowing ? 'DELETE' : 'POST';
+        
+        $.ajax({
+            url: `/api/users/${userId}/follow/`,
+            method: method,
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            success: function() {
+                const btn = $('.follow-btn');
+                btn.text(isFollowing ? 'Follow' : 'Following');
+            }
+        });
+    });
+
+    // Handle post likes in profile
+    $(document).on('click', '.like-post', function() {
+        const postId = $(this).data('post-id');
+        const isLiked = $(this).hasClass('liked');
+        const $btn = $(this);
+        const $icon = $btn.find('i');
+        const $count = $btn.find('.like-count');
+        
+        $.ajax({
+            url: `/api/posts/${postId}/like/`,
+            method: isLiked ? 'DELETE' : 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            beforeSend: function() {
+                $btn.prop('disabled', true);
+            },
+            success: function() {
+                $btn.toggleClass('liked');
+                $icon.toggleClass('far fas');
+                const currentCount = parseInt($count.text());
+                $count.text(isLiked ? currentCount - 1 : currentCount + 1);
+            },
+            error: function(xhr) {
+                alert('Error: ' + xhr.responseJSON?.detail || 'Something went wrong');
+            },
+            complete: function() {
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+});
+
+function loadUserPosts(userId) {
+    $.ajax({
+        url: `/api/posts/?author=${userId}`,
+        method: 'GET',
+        success: function(response) {
+            $('#user-posts-container').empty();
+            if (response.length === 0) {
+                $('#user-posts-container').html('<p class="text-muted text-center py-4">No tweets yet.</p>');
+                return;
+            }
+            
+            response.forEach(function(post) {
+                renderUserPost(post);
+            });
+        }
+    });
+}
+
+function renderUserPost(post) {
+    const likeIconClass = post.is_liked ? 'fas' : 'far';
+    const likeBtnClass = post.is_liked ? 'liked' : '';
+    
+    const postElement = $(`
+        <div class="post-card">
+            <div class="d-flex">
+                {% if profile.profile_pic %}
+                    <img src="{{ profile.profile_pic.url }}" class="profile-pic me-3" alt="Profile">
+                {% else %}
+                    <div class="profile-pic default-profile me-3">
+                        {{ profile.user.username|first|upper }}
+                    </div>
+                {% endif %}
+                <div class="w-100">
+                    <div class="d-flex align-items-center mb-1">
+                        <h6 class="mb-0 me-2">${post.author.username}</h6>
+                        <small class="text-muted">@${post.author.username} · ${new Date(post.created_at).toLocaleDateString()}</small>
+                    </div>
+                    <p class="mb-2">${post.content}</p>
+                    ${post.image ? `<img src="${post.image}" class="img-fluid rounded-3 mb-2" alt="Post Image">` : ''}
+                    <div class="d-flex justify-content-between w-75">
+                        <button class="btn btn-comment">
+                            <i class="far fa-comment"></i> <span class="comment-count">${post.comments_count || 0}</span>
+                        </button>
+                        <button class="btn btn-like like-post ${likeBtnClass}" data-post-id="${post.id}">
+                            <i class="${likeIconClass} fa-heart"></i> <span class="like-count">${post.likes_count || 0}</span>
+                        </button>
+                        <button class="btn text-muted">
+                            <i class="fas fa-retweet"></i>
+                        </button>
+                        <button class="btn text-muted">
+                            <i class="far fa-share-square"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    $('#user-posts-container').append(postElement);
+}
+</script>
+{% endblock %}
+{% endblock %}
