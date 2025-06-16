@@ -50,8 +50,8 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'dj_rest_auth',
     'dj_rest_auth.registration',
-   
-    
+
+
     # Local apps
     'core',
     'api',
@@ -65,8 +65,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-   
+
     'allauth.account.middleware.AccountMiddleware',
+    'corsheaders.middleware.CorsMiddleware', # Add this if not already present and you use corsheaders
 ]
 
 ROOT_URLCONF = 'socialmedia.urls'
@@ -112,7 +113,7 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
+# https://docs.djangoproject.com/en/5.2/topics/i18n/
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -189,6 +190,14 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-ACCOUNT_SIGNUP_FIELDS = ['email', 'username', 'password1', 'password2']
-ACCOUNT_LOGIN_METHODS = ['username', 'email']
-ACCOUNT_EMAIL_VERIFICATION = 'optional' 
+# Allauth settings for dj-rest-auth integration
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email' # Allows login with both username and email
+ACCOUNT_EMAIL_REQUIRED = True # Email is required for signup
+ACCOUNT_USERNAME_REQUIRED = True # Username is required for signup
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True # If you want to confirm email by clicking a link
+ACCOUNT_EMAIL_VERIFICATION = 'optional' # Changed from 'optional' as it's the default and handles email verification flows
+
+# If you have a custom signup form, you would configure it here:
+# ACCOUNT_FORMS = {
+#     'signup': 'core.forms.CustomSignupForm', # Example if you had a custom form in core/forms.py
+# }
