@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 import os
+# from dotenv import load_dotenv
+import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -94,15 +96,20 @@ WSGI_APPLICATION = 'socialmedia.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': 'socialmedia',
+#         'USER': 'socialmedia_user',
+#         'PASSWORD': '123456',
+#         'HOST': 'localhost',
+#         'PORT': '5432',
+#     }
+# }
+
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'socialmedia',
-        'USER': 'socialmedia_user',
-        'PASSWORD': '123456',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
+    'default': dj_database_url.parse(os.getenv('postgresql://gallery_usjl_user:ENQRBRLLFqO73gZbb4d2PDCC5lsbfE6S@dpg-d0uamqqdbo4c73apr6h0-a.oregon-postgres.render.com/gallery_usjl'))
 }
 
 
