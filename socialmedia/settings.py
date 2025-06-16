@@ -109,7 +109,7 @@ WSGI_APPLICATION = 'socialmedia.wsgi.application'
 
 
 DATABASES = {
-    'default': dj_database_url.parse(os.getenv('postgresql://gallery_usjl_user:ENQRBRLLFqO73gZbb4d2PDCC5lsbfE6S@dpg-d0uamqqdbo4c73apr6h0-a.oregon-postgres.render.com/gallery_usjl'))
+    'default': dj_database_url.parse('postgresql://gallery_usjl_user:ENQRBRLLFqO73gZbb4d2PDCC5lsbfE6S@dpg-d0uamqqdbo4c73apr6h0-a.oregon-postgres.render.com/gallery_usjl')
 }
 
 
