@@ -79,6 +79,7 @@ TEMPLATES = [
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
+                'django.template.context_processors.debug',
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
@@ -95,13 +96,6 @@ WSGI_APPLICATION = 'socialmedia.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
-DATABASES = {
-    'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'socialmedia',
         'USER': 'socialmedia_user',
@@ -113,7 +107,7 @@ DATABASES = {
 
 
 # Password validation
-# https://docs.djangoproject.com/en/5.2/topics/i18n/
+# https://docs.djangoproject.com/en/5.2/topics/auth/passwords/#module-django.contrib.auth.password_validation
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -146,7 +140,13 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
+# Media files
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -179,23 +179,12 @@ CORS_ALLOWED_ORIGINS = [
     "http://127.0.0.1:8000",
 ]
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
-# Static files
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-
 # Allauth settings for dj-rest-auth integration
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email' # Allows login with both username and email
-ACCOUNT_EMAIL_REQUIRED = True # Email is required for signup
-ACCOUNT_USERNAME_REQUIRED = True # Username is required for signup
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True # If you want to confirm email by clicking a link
-ACCOUNT_EMAIL_VERIFICATION = 'optional' # Changed from 'optional' as it's the default and handles email verification flows
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+ACCOUNT_CONFIRM_EMAIL_ON_GET = True
+ACCOUNT_EMAIL_VERIFICATION = 'optional'
 
 # If you have a custom signup form, you would configure it here:
 # ACCOUNT_FORMS = {
