@@ -1,3 +1,5 @@
+# core/views.py
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
@@ -33,13 +35,8 @@ def register_view(request):
                 profile.profile_pic = request.FILES['profile_pic']
                 profile.save()
             
-            # Authenticate and login the user
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password1')
-            user = authenticate(username=username, password=password)
-            login(request, user)
-            messages.success(request, 'Registration successful!')
-            return redirect('home')
+            messages.success(request, 'Registration successful! Please log in with your new account.')
+            return redirect('login') # Changed: Redirects to the login page
     else:
         form = UserCreationForm()
     return render(request, 'core/register.html', {'form': form})
@@ -58,8 +55,8 @@ def login_view(request):
                 login(request, user)
                 messages.success(request, f'Welcome back, {username}!')
                 return redirect('home')
-        else:
-            messages.error(request, 'Invalid username or password.')
+            else:
+                messages.error(request, 'Invalid username or password.')
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
